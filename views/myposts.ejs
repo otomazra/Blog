@@ -1,0 +1,22 @@
+<%- include("partials/header.ejs")%>
+
+<section>
+    <div>
+        <% for(let i=0;i<data.length;i++){ %>
+            <div>
+                <h2><%=data[i].title%></h2>
+                <p><%= data[i].author %></p>
+                <p><%= data[i].text %></p>
+                <form action="/post/<%= data[i].id %>">
+                    <input type="submit" value="view" />
+                </form>
+            </div>
+       <% } %>
+    </div>
+</section>
+
+
+
+
+
+<%- include("partials/footer.ejs")%>

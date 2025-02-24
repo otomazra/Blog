@@ -1,0 +1,22 @@
+<%- include("partials/header.ejs") %> <%- include("partials/navbar.ejs") %>
+
+<section>
+  <form action="/" method="get">
+    <button type="submit">Main Page</button>
+  </form>
+  <% if(loggedIn && isAuthor) { %>
+  <form action="/edit/<%= data.id %>" method="get">
+    <button type="submit">Edit</button>
+  </form>
+  <form action="/delete/<%= data.id %>" method="post">
+    <button type="submit">Delete</button>
+  </form>
+  <% } %>
+
+  <div>
+    <h1><%= data.title %></h1>
+    <p><%= data.text %></p>
+    <p><%= data.author %></p>
+  </div>
+</section>
+<%- include("partials/footer.ejs")%>

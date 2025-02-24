@@ -1,0 +1,13 @@
+<%- include("partials/header.ejs") %>
+
+
+<form action="/signup" method="post">
+  <label for="email">Email</label>
+  <input type="text" name="email" placeholder="email" required />
+  <label for="username">Username</label>
+  <input type="text" name="username" placeholder="username" required />
+  <label for="password">Password</label>
+  <input type="password" name="password" placeholder="password" required />
+  <button type="submit">Sign up</button>
+</form>
+<%- include("partials/footer.ejs")%>

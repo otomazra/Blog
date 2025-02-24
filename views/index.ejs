@@ -1,0 +1,23 @@
+<%- include("partials/header.ejs") %>
+<%- include("partials/navbar.ejs") %>
+
+    
+    <section>
+        <div class="post-list">
+            <% for(let i=0;i<data.length;i++){ %>
+                    <div class="post">
+                        <h1><%= data[i].title %></h1>
+                        <p class="post-body"><%= data[i].text %></p>
+                        <p> <%= data[i].author %></p>
+                        <form action="/post/<%= data[i].id %>">
+                            <input type="submit" value="view" />
+                        </form>
+                    </div>
+           <% } %>
+            
+        </div>
+
+    </section>
+
+        
+<%- include("partials/footer.ejs")%>

@@ -1,0 +1,20 @@
+<section>
+  <div class="navbar">
+    <div>
+      <a href="/"><img scr="" /></a>
+      <a href="/"><p>Home</p></a>
+      <% if (loggedIn) { %>
+      <a href="/create"><p>Create a Post</p></a>
+      <% } %>
+    </div>
+    <div>
+      <% if(!loggedIn){ %>
+      <a href="/login"><p>Log In</p></a>
+      <a href="/signup"><p>Sign Up</p></a>
+      <% }else { %>
+      <a href="/myposts">My Posts</a>
+      <a href="/logout"><p>Log Out</p></a>
+      <% } %>
+    </div>
+  </div>
+</section>

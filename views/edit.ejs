@@ -1,0 +1,17 @@
+<%- include("partials/header.ejs") %>
+<%- include("partials/navbar.ejs") %>
+
+<section>
+  <div>
+    <form action="/edit/<%= post.id %>" method="post">
+      <% console.log(" edit.ejs id: "+post.id) %>
+      <!-- <input name="id" value="<% post.id %>" style="display: none ;"> -->
+      <input type="text" name="title" value="<%= post.title %>" />
+      <input type="text" name="author" value="<%= post.author %>" />
+      <textarea name="text"><%= post.text %></textarea>
+      <button type="submit">Submit</button>
+      <!-- <input type="button" value="Cancel"> -->
+    </form>
+  </div>
+</section>
+<%- include("partials/footer.ejs")%>

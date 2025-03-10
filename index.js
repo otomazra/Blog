@@ -4,6 +4,7 @@ import pg from "pg";
 import bcrypt from "bcrypt";
 import session from "express-session";
 import { Strategy } from "passport-local";
+import GoogleStrategy from "passport-google-oauth2";
 import passport from "passport";
 import env from "dotenv";
 
@@ -18,10 +19,10 @@ env.config();
 const saltRounds = 10;
 
 const db = new pg.Client({
-  USER: process.env.DATABASE_USER,
-  HOST: process.env.DATABASE_HOST,
-  DATABASE: process.env.DATABASE,
-  PASSWORD: process.env.DATABASE_PASSWORD,
+  user: process.env.DATABASE_USER,
+  host: process.env.DATABASE_HOST,
+  database: process.env.DATABASE,
+  password: process.env.DATABASE_PASSWORD,
   port: process.env.DATABASE_PORT,
 });
 
@@ -42,15 +43,15 @@ app.use(
     secret: "secretkey",
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 1000 * 60*60*24 },
+    cookie: { maxAge: 1000 * 60 * 60 * 24 },
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-function isAuthenticated(req,res,next){
-  if(req.isAuthenticated()){
+function isAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) {
     return next();
   }
   res.redirect("/login");
@@ -190,7 +191,7 @@ app.post("/delete/:id", isAuthenticated, async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login.ejs", {  headTitle: "Log in" });
+  res.render("login.ejs", { headTitle: "Log in" });
 });
 
 app.get("/signup", (req, res) => {
@@ -255,20 +256,29 @@ app.post(
   })
 );
 
+app.get("/auth/google", passport.authenticate("google",{
+  scope: ["profile", "email"],
+}));
+
+app.get("/auth/google/myposts", passport.authenticate("google", {
+  successRedirect: "/myposts",
+  failureRedirect: "/login",
+}));
+
 app.get("/myposts", isAuthenticated, async (req, res) => {
   let user = req.user;
   console.log(req.user);
   const result = await db.query("SELECT * FROM posts WHERE user_id=$1", [
     user.id,
   ]);
-  console.log(result.rows);
-  console.log(result.rows[0]);
+  console.log("romelixar", result.rows);
+  console.log("alo", result.rows[0]);
   res.render("myposts.ejs", { data: result.rows, headTitle: "My Posts" });
 });
 
 app.get("/logout", (req, res, next) => {
-  req.logout((err)=>{
-    if(err) return next(err);
+  req.logout((err) => {
+    if (err) return next(err);
   });
   res.redirect("/");
 });
@@ -324,6 +334,40 @@ passport.use(
   })
 );
 
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+
+passport.use(
+  "google",
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/myposts",
+      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+    },
+    async (accessToken, refreshToken, profile, cb) => {
+      try {
+        const google_id = profile.id;
+        const email = profile.emails[0].value;
+        const result = await db.query("SELECT * FROM users WHERE email=$1", [
+          email,
+        ]);
+        if (result.rows.length === 0) {
+          const newUser = await db.query(
+            "INSERT INTO users(email, password) VALUES($1,$2) RETURNING *",
+            [email, "google_id"]
+          );
+          return cb(null, newUser.rows[0]);
+        } else {
+          return cb(null, result.rows[0]);
+        }
+      } catch (err) {
+        return cb(err);
+      }
+    }
+  )
+);
+
 passport.serializeUser((user, cb) => {
   cb(null, user.id);
 });
@@ -331,10 +375,9 @@ passport.serializeUser((user, cb) => {
 passport.deserializeUser(async (id, cb) => {
   try {
     const result = await db.query("SELECT * FROM users where id=$1", [id]);
-    if(result.rows.length>0){
+    if (result.rows.length > 0) {
       cb(null, result.rows[0]);
-    }
-    else{
+    } else {
       cb(null, false);
     }
   } catch (error) {

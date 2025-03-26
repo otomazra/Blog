@@ -273,7 +273,7 @@ app.get("/myposts", isAuthenticated, async (req, res) => {
   ]);
   console.log("romelixar", result.rows);
   console.log("alo", result.rows[0]);
-  res.render("myposts.ejs", { data: result.rows, headTitle: "My Posts" });
+  res.render("myposts.ejs", { loggedIn: req.isAuthenticated(), data: result.rows, headTitle: "My Posts" });
 });
 
 app.get("/logout", (req, res, next) => {
